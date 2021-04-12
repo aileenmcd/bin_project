@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1617982845266.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3962233840",
+    "id" : "B9E610E",
+    "lastKnownWriteTime" : 1618147213,
+    "last_content_update" : 1618147213237,
+    "path" : "~/Documents/bin_visualisation/bin_visualisation/scripts/main_script.R",
+    "project_path" : "scripts/main_script.R",
+    "properties" : {
+        "cursorPosition" : "208,57",
+        "scrollLine" : "188"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
