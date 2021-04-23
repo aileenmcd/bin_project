@@ -12,7 +12,7 @@ library(tidyverse)
 library(sf)
 
 #read in the cleaned and combined bin & osm data 
-combined_bin_osm <- st_read("cleaned_data/combined_bin_osm_data/combined_bin_osm.shp")
+combined_bin_osm <- st_read(here::here("cleaned_data/combined_bin_osm_data/combined_bin_osm.shp"))
 
   
 #undoing some shortened naming when read to shape file
@@ -26,7 +26,10 @@ mutate(cumul_date = date - min(combined_bin_osm$date)) %>%
        "highway_group" = "hghwy_g")
 
 # read in all the .shp files in the cleaned osm data folder 
-dir_path <- 'cleaned_data/osm_data/'
+root_of_project_path <- here::here()
+project_path <- '/cleaned_data/osm_data/'
+dir_path <- paste0(root_of_project_path, project_path)
+  
 file_pattern <- '*.shp'
 shp_files <- list.files(dir_path, pattern = file_pattern)
 
@@ -50,16 +53,16 @@ blankbg <-theme(axis.line=element_blank(),
                 axis.ticks=element_blank(),
                 axis.title.x=element_blank(), 
                 axis.title.y=element_blank(),
-               # legend.position = "none",
+                legend.position = "none",
                 plot.background=element_blank(),
                 panel.grid.minor=element_blank(),
                 panel.background=element_blank(),
                 panel.grid.major=element_blank(),
-                plot.margin = unit(c(t=2,r=2,b=2,l=2), "cm"),
-                plot.caption = element_text(color = "grey20", size = 12, 
-                                            hjust = .5, face = "plain", 
-                                            family = "Didot"),
-                panel.border = element_blank()
+              #  plot.margin = unit(c(t=2,r=2,b=2,l=2), "cm"),
+              #  plot.caption = element_text(color = "grey20", size = 12, 
+              #                              hjust = .5, face = "plain", 
+              #                              family = "Didot"),
+              #  panel.border = element_blank()
 )
 
 
@@ -76,11 +79,12 @@ shinyApp(
     column(3, sliderInput("date_chosen", "Days:", 
                           min(unique(combined_bin_osm$cumul_date)),  
                           max(unique(combined_bin_osm$cumul_date)),
-                          median(unique(combined_bin_osm$cumul_date)), 
-                          animate = animationOptions(interval = 1400))),
+                          max(unique(combined_bin_osm$cumul_date)), 
+                          animate = animationOptions(interval = 1400)))),
     fluidRow(column(6, plotOutput("map")),
-    column(6, plotOutput("street_plot")))
-  )),
+    column(6, plotOutput("street_plot"))),
+    fluidRow(plotOutput("line_plot"))
+  ),
 
   server = function(input, output) {
 
@@ -98,6 +102,7 @@ shinyApp(
      output$map = renderPlot({
 
 ggplot() +
+         blankbg +
   geom_sf(data = water,
           fill = "steelblue",
           # size = .8,
@@ -130,7 +135,8 @@ ggplot() +
             filter(highway_group == "large"),
           size = .5,
           color = "grey30") +
-  geom_sf(data =   subset_bin_data(), color = "red", size = .5, show.legend = "line") +
+  geom_sf(data =   subset_bin_data(), aes(color = street_name), size = 1.5, show.legend = "line") +
+  scale_colour_manual(values = c("#e41a1c", "#377eb8")) +
   labs(caption = 'Edinburgh - bin sensor project', size = 2) +
   coord_sf(ylim = c(min_max_coords[1], min_max_coords[3]),
            xlim = c(min_max_coords[2], min_max_coords[4]),
@@ -141,10 +147,27 @@ ggplot() +
     output$street_plot = renderPlot({
      
        subset_bin_data() %>%
-        ggplot(aes(x = street_name, y = cumul_total_weight_kg)) +
+        ggplot(aes(x = street_name, y = cumul_total_weight_kg, fill = street_name)) +
         geom_col() +
-        scale_y_continuous(breaks = c(120, 983) , labels = c('baby elephant', 'vauxhall corsa'))
+        scale_y_continuous(breaks = c(120, 983) , labels = c('baby elephant', 'vauxhall corsa')) +
+        scale_fill_manual(values = c("#e41a1c", "#377eb8"))  +
+        theme_minimal()
       
+    })
+  
+    
+    output$line_plot = renderPlot({
+    
+      streets_chosen <- c(input$street1_chosen, input$street2_chosen)
+      
+      combined_bin_osm %>%
+        filter(cumul_date <= input$date_chosen, street_name %in% streets_chosen) %>%
+    ggplot(aes(x = date, y = cumul_total_weight_kg, color = street_name)) +
+    geom_line() +
+          scale_colour_manual(values = c("#e41a1c", "#377eb8"))  +
+        xlim(min(combined_bin_osm$date), max(combined_bin_osm$date)) +
+       theme_minimal()
+    
     })
   },
 
