@@ -1,18 +1,14 @@
 #code from https://taraskaduk.com/posts/2021-01-18-print-street-maps/
-
 library(osmdata)
 library(tidyverse)
 library(sf)
 library(lwgeom) #for the water area calculation 
 library(gganimate)
 
-# loading in bin data 
-bins <- read_csv("data/aggregated_bin_data.csv")
-
-
+#set place 
 place <- "Edinburgh UK"
 
-#set thickness depends on type of line
+#set thickness depends on type of street (e.g. motorways to be drawn thinker than pedestrian streets
 highway_sizes <- tibble::tribble(
   ~highway, ~highway_group, ~size,
   "motorway",        "large",   0.5,
@@ -42,7 +38,7 @@ streets_osm <- opq(place) %>% #Build an Overpass query
 #get names of Edinburgh streets
 unique(streets_osm$osm_lines$name)
 
-#added name.left as there was some small streets which are subparts of other streets (investigated missing streets without this term in https://www.openstreetmap.org/way/183699651)
+#added name.left as there was some small streets which are subparts of other streets (investigated these missing streets using https://www.openstreetmap.org/way/183699651 and it highlighted this 'name.left' variable)
 streets <- streets_osm$osm_lines %>% 
   dplyr::select(osm_id, name, highway, maxspeed, oneway, surface, name.left) %>% 
   mutate(length = as.numeric(st_length(.))) %>% 
@@ -64,7 +60,7 @@ river_osm <- opq(place) %>%
   osmdata_sf() %>% 
   unname_osmdata_sf()
 
-# get water - extra since polygon
+# get water - extra step compared to railways and streets since is a ploygon since polygon
 water_osm <- opq(place) %>%
   add_osm_feature(key = "natural", value = "water") %>%
   osmdata_sf() %>% 
@@ -102,95 +98,46 @@ park_multipoly <- c(park_osm) %>%
   select(osm_id, name) %>% 
   mutate(area = st_area(.)) 
 
-park <- bind_rows(park_poly, park_multipoly)
 
 # Box ---------------------------------------------------------------------
 
-# decide cut off for centre of Edinburgh
-bbox <- c(ymin= 55.928479867725436,
+# decide cut off for centre of Edinburgh (chosen via visual insepction on google maps) 
+min_max_coords <- c(ymin= 55.928479867725436,
           xmin= -3.227624857214751,
           ymax= 55.98333902701634,
           xmax= -3.140735628435386)
 
 
-# Crop all the roads/water/rail to boundary set 
-water_cropped <- st_crop(water, bbox)
-streets_cropped <- st_crop(streets, bbox)
-railways_cropped <- st_crop(railways, bbox)
-green_cropped <- st_crop(green, bbox)
-park_poly_cropped <- st_crop(park_poly, bbox)
-
-#there are repeats of some roads because can be broken up/classified as different categories ('highway' variable)
-# take the longest length values of each
-streets_cropped <- streets_cropped %>%
+#there are repeats of some roads because can be broken up/classified as different categories (seen in the'highway' variable)
+#decided to take the longest length values of each
+streets_simplified <- streets %>%
   group_by(name, name.left) %>%
   mutate(max_length = max(length)) %>%
-  filter(length == max_length)
+  filter(length == max_length) %>%
+  rename("substreet_name" = "name.left", "street_name" = "name") %>%
+  mutate(substreet_name = str_to_lower(substreet_name)) %>%
+  mutate(street_name = str_to_lower(street_name)) 
 
-# Bin data ----------------------------------------------------------------
 
-# EDA on bin data streest
-bin_streets <- bins %>%
-  select(street_name) %>%
-  distinct()
 
-bin_streets %>% count()
-
-map_streets <- as_tibble(streets_cropped$name) %>%
-  mutate(value = str_to_lower(value)) %>%
-  distinct() 
-
-map_streets %>% count()
-
-#no matches for 23 streets 
-no_match <- bin_streets %>% anti_join(map_streets, by = c("street_name" = "value"))
-no_match
-#from inspection these look to be small streets so may not be named in the osmdata 
-
-map_streets_nameleft <- as_tibble(streets_cropped$name.left) %>%
-  mutate(value = str_to_lower(value)) %>%
-  distinct()
-
-no_match %>% anti_join(map_streets_nameleft, by = c("street_name" = "value"))
-
-# notes from manual inspection:
-# promanade & st mark's place is in portebello - outside area looking to concentrate on 
-# gayfield square park, leith links, princes street gardens east, princes street gardens west are all parks so decide to omit do to visualising 'amount' of data via thickness of line of street which would not be approrpiate for park polygon space
-# restalrig railway path is a cycleway on OSM so choose to omit. 
-
-streets_cropped <- streets_cropped %>%
-  mutate(name = str_to_lower(name)) %>%
-  mutate(name.left = str_to_lower(name.left)) %>%
-  rename(sub_street_name = name.left) 
+# Crop all the roads/water/rail to boundary set and write to a .shp file 
+# Write a function as repeat this step 
+crop_and_write <- function(sf_dataframe, cut_coords) {
+  cropped_sf_dataframe <- st_crop(sf_dataframe, cut_coords) 
+  st_write(cropped_sf_dataframe, paste0("cleaned_data/osm_data/",deparse(substitute(sf_dataframe)),".shp"))
+}
   
-bins <- bins %>%
-  mutate(street_name = case_when(
-  street_name == "atholl cresent" ~ "atholl crescent", #spelling error in bin data
-  TRUE ~ street_name)) %>%
-  filter(str_detect(street_name, "square", negate = TRUE)) #remove any 'squares' as does not visualise well for this
+crop_and_write(water, min_max_coords)
+crop_and_write(streets_simplified, min_max_coords)
+crop_and_write(railways, min_max_coords)
+crop_and_write(green, min_max_coords)
+crop_and_write(park_poly, min_max_coords)
+
+#park is a multipoly so cropping wasn't working like others
+st_write(park_multipoly, "cleaned_data/osm_data/park_multipoly.shp")
 
 
-last_date_bin_collection <- bins %>%
-  group_by(street_name) %>%
-  arrange(street_name, desc(date)) %>%
-  slice_max(1)
-
-# first check to join by 'street_name' column
-last_date_bin_collection_first_join <- last_date_bin_collection %>%
-  inner_join(streets_cropped, by = c("street_name" = "name"))
-
-# for any ones which don't match on 'street_name' try on 'sub_street_name' as this has info on smaller sub streets
-last_date_bin_collection_second_join <- last_date_bin_collection %>%
-  anti_join(streets_cropped, by = c("street_name" = "name")) %>%
-  inner_join(streets_cropped, by = c("street_name" = "sub_street_name")) %>%
-  select(-name)
-
-# combine data from first and second join checks 
-last_date_bin_collection_sf <- bind_rows(last_date_bin_collection_first_join, last_date_bin_collection_second_join) %>%
-  st_as_sf() #convert to sf object
-
-
-# Plotting ----------------------------------------------------------------
+# Plotting theme ----------------------------------------------------------------
 
 blankbg <-theme(axis.line=element_blank(),
                 axis.text.x=element_blank(),
@@ -210,4 +157,3 @@ blankbg <-theme(axis.line=element_blank(),
                 panel.border = element_blank()
 )
 
-# potential to change over time https://www.datanovia.com/en/blog/gganimate-how-to-create-plots-with-beautiful-animation-in-r/
