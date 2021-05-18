@@ -1,3 +1,6 @@
+library(tidyverse)
+library(sf)
+
 #read in the cleaned and combined bin & osm data 
 combined_bin_osm <- st_read("cleaned_data/combined_bin_osm_data/combined_bin_osm.shp")
 
@@ -148,17 +151,22 @@ combined_bin_osm %>%
   ggplot(aes(x = date, y = cumul_total_weight_kg, group = street_name)) +
   geom_line() +
   scale_y_continuous(trans = "log10") +
-  labs(y = "Log transform of cumulative weight of rubbish in kg")
+  scale_x_date(date_labels = "%d %b") +
+  labs(y = "Log transform of cumulative weight of rubbish in kg in")
 
 combined_bin_osm %>%
   filter(street_name %in% c("calton hill", "hermitage place")) %>%
   ggplot(aes(x = date, y = cumul_total_weight_kg, color = street_name)) +
   geom_line() +
   scale_y_continuous(trans ="log10") +
-  labs(y = "Log transform of cumulative weight of rubbish in kg")
+  scale_x_date(date_labels = "%d %b") +
+  labs(y = "Log transform of cumulative weight of rubbish in kg") +
+  theme_minimal()
 
 combined_bin_osm %>%
   filter(street_name %in% c("calton hill", "hermitage place")) %>%
   ggplot(aes(x = date, y = cumul_total_weight_kg, color = street_name)) +
+  scale_x_date(date_labels = "%d %b") +
+  labs(y = "Cumulative weight of rubbish in kg") +
   geom_line() +
   theme_minimal()

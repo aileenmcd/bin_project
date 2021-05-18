@@ -73,9 +73,11 @@ shinyApp(
   
   ui = fluidPage(
     fluidRow(column(3, selectInput("street1_chosen", "Street 1:",
-                choices = unique(combined_bin_osm$street_name))),
+                choices = unique(combined_bin_osm$street_name),
+                selected = "atholl crescent")),
     column(3, selectInput("street2_chosen", "Street 2:",
-                choices = unique(combined_bin_osm$street_name))),
+                choices = unique(combined_bin_osm$street_name),
+                selected = "calton hill")),
     column(3, sliderInput("date_chosen", "Days:", 
                           min(unique(combined_bin_osm$cumul_date)),  
                           max(unique(combined_bin_osm$cumul_date)),
