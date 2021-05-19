@@ -47,9 +47,19 @@ last_date_bin_collection_sf <- combined_bin_osm %>%
 
 # Plots -------------------------------------
 
-# Highlighting which streets have sensor bins on ----------------------------
+map_theme <-theme(axis.line=element_blank(),
+                axis.text.x=element_blank(),
+                axis.text.y=element_blank(),
+                axis.ticks=element_blank(),
+                axis.title.x=element_blank(), 
+                axis.title.y=element_blank(),
+                plot.background=element_blank(),
+                panel.grid.minor=element_blank(),
+                panel.background=element_blank(),
+                panel.grid.major=element_blank())
 
-ggplot() +
+base_plot <- ggplot() +
+  map_theme +
   geom_sf(data = water,
           fill = "steelblue",
           # size = .8,
@@ -81,48 +91,19 @@ ggplot() +
   geom_sf(data = streets_simplified %>% 
             filter(highway_group == "large"),
           size = .5,
-          color = "grey30") +
-  geom_sf(data =  last_date_bin_collection_sf, color = "red", size = .5, show.legend = "line") +
+          color = "grey30") 
+
+# Highlighting which streets have sensor bins on ----------------------------
+
+base_plot + 
+  geom_sf(data =  last_date_bin_collection_sf, color = "red", size = .7, show.legend = "line") +
   labs(caption = 'Edinburgh - bin sensor project', size = 2) +
   coord_sf(ylim = c(min_max_coords[1], min_max_coords[3]),
            xlim = c(min_max_coords[2], min_max_coords[4]),
            expand = FALSE)
 
-
 # Last bin collection thickness showing weight ----------------------------
-ggplot() +
-  geom_sf(data = water,
-          fill = "steelblue",
-          # size = .8,
-          lwd = 0,
-          alpha = .3) +
-  geom_sf(data = park_multipoly,
-          fill = "green",
-          # size = .8,
-          lwd = 0,
-          alpha = .3) +
-  geom_sf(data = park_poly,
-          fill = "green",
-          # size = .8,
-          lwd = 0,
-          alpha = .3) +
-  geom_sf(data = railways,
-          color = "grey30",
-          size = .2,
-          linetype="dotdash",
-          alpha = .5) +
-  geom_sf(data = streets_simplified %>% 
-            filter(highway_group == "small"),
-          size = .1,
-          color = "grey40") +
-  geom_sf(data = streets_simplified %>% 
-            filter(highway_group == "medium"),
-          size = .3,
-          color = "grey35") +
-  geom_sf(data = streets_simplified %>% 
-            filter(highway_group == "large"),
-          size = .5,
-          color = "grey30") +
+base_plot + 
   geom_sf(data =  last_date_bin_collection_sf, aes(colour = cumul_total_weight_kg), 
           size = 1,
           show.legend = "line") +

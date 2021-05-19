@@ -30,8 +30,20 @@ Project aims:
     period.
   - Explore how the volume/weight of rubbish compares between bin
     locations.
+  - Create small interactive plots for users to explore data.
 
 Attribution: The learning/code using the OpenStreetMap data come from
 this [blog](https://taraskaduk.com/posts/2021-01-18-print-street-maps/)
 (Reference: Kaduk (2021, Jan. 18). Taras Kaduk: Print Personalized
 Street Maps Using R).
+
+Notes on some of the locations:
+
+  - Decided to concentrate on Edinburgh City Centre so did not include
+    locations in Portobello.
+  - Gayfield Square Park, Leith Links, Princes Street Gardens East,
+    Princes Street Gardens West are all parks so decide to remove from
+    analysis as found visualising volume via thickness of line of street
+    did not work well for parks (since these are filled polygons).
+  - Restalrig railway path is a cycleway on OSM so choose to also
+    remove.
