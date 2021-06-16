@@ -1,0 +1,188 @@
+library(shiny)
+library(tidyverse)
+library(sf)
+
+#read in the cleaned and combined bin & osm data 
+combined_bin_osm <- st_read("cleaned_data/combined_bin_osm_data/combined_bin_osm.shp", quiet = TRUE)
+
+
+#undoing some shortened naming when read to shape file
+combined_bin_osm <- combined_bin_osm %>%
+  mutate(cumul_date = date - min(combined_bin_osm$date)) %>%
+  rename("street_name" = "strt_nm",
+         "total_vol_l3" = "ttl_v_3",
+         "total_weight_kg" = "ttl_wg_",
+         "cumul_total_vol_l3" = "cm_t__3",
+         "cumul_total_weight_kg" = "cm_tt__",
+         "highway_group" = "hghwy_g")
+
+# read in all the .shp files in the cleaned osm data folder 
+root_of_project_path <- here::here()
+project_path <- '/cleaned_data/osm_data/'
+dir_path <- paste0(root_of_project_path, project_path)
+
+file_pattern <- '*.shp'
+shp_files <- list.files(dir_path, pattern = file_pattern)
+
+for (i in seq_along(shp_files)) {
+  assign(str_remove(shp_files[i], ".shp"), st_read(paste0(dir_path, shp_files[i]), quiet = TRUE))
+}
+
+#undoing some shortened naming when read to shape file
+streets_simplified <- streets_simplified %>%
+  rename("street_name" = "strt_nm",
+         "highway_group" = "hghwy_g")
+
+combined_bin_osm <- combined_bin_osm %>%
+  mutate(street_name = str_to_title(street_name))
+
+min_max_coords <- c(ymin= 55.928479867725436,
+                    xmin= -3.227624857214751,
+                    ymax= 55.98333902701634,
+                    xmax= -3.140735628435386)
+
+blankbg <-theme(axis.line=element_blank(),
+                axis.text.x=element_blank(),
+                axis.text.y=element_blank(),
+                axis.ticks=element_blank(),
+                axis.title.x=element_blank(), 
+                axis.title.y=element_blank(),
+                legend.position = "none",
+                plot.background=element_blank(),
+                panel.grid.minor=element_blank(),
+                panel.background=element_blank(),
+                panel.grid.major=element_blank(),
+                
+)
+
+
+shinyApp(
+  
+  ui = fluidPage(
+    fluidRow(column(3, selectInput("street1_chosen", "Street 1:",
+                                   choices = unique(combined_bin_osm$street_name),
+                                   selected = "Atholl Crescent")),
+             column(3, selectInput("street2_chosen", "Street 2:",
+                                   choices = unique(combined_bin_osm$street_name),
+                                   selected = "Calton Hill")),
+             column(3, sliderInput("date_chosen", "Days:", 
+                                   min(unique(combined_bin_osm$cumul_date)),  
+                                   max(unique(combined_bin_osm$cumul_date)),
+                                   max(unique(combined_bin_osm$cumul_date)), 
+                                   animate = animationOptions(interval = 1400))),
+             column(3, selectInput("scale_chosen", "Scale choice:",
+                                   choices = c("Kilograms", "Objects")))),
+    fluidRow(column(6, plotOutput("map")),
+             column(6, plotOutput("street_plot"))),
+    fluidRow(plotOutput("line_plot"))
+  ),
+  
+  server = function(input, output) {
+    
+    
+    subset_bin_data <- reactive({
+      
+      streets_chosen <- c(input$street1_chosen, input$street2_chosen)
+      
+      combined_bin_osm %>%
+        filter(cumul_date == input$date_chosen, street_name %in% streets_chosen) 
+      
+    })
+    
+    
+    output$map = renderPlot({
+      
+      ggplot() +
+        blankbg +
+        geom_sf(data = water,
+                fill = "steelblue",
+                # size = .8,
+                lwd = 0,
+                alpha = .3) +
+        geom_sf(data = park_multipoly,
+                fill = "green",
+                # size = .8,
+                lwd = 0,
+                alpha = .3) +
+        geom_sf(data = park_poly,
+                fill = "green",
+                # size = .8,
+                lwd = 0,
+                alpha = .3) +
+        geom_sf(data = railways,
+                color = "grey30",
+                size = .2,
+                linetype="dotdash",
+                alpha = .5) +
+        geom_sf(data = streets_simplified %>% 
+                  filter(highway_group == "small"),
+                size = .1,
+                color = "grey40") +
+        geom_sf(data = streets_simplified %>% 
+                  filter(highway_group == "medium"),
+                size = .3,
+                color = "grey35") +
+        geom_sf(data = streets_simplified %>% 
+                  filter(highway_group == "large"),
+                size = .5,
+                color = "grey30") +
+        geom_sf(data =   subset_bin_data(), aes(color = street_name), size = 1.5, show.legend = "line") +
+        scale_colour_manual(values = c("#e41a1c", "#377eb8")) +
+        labs(caption = 'Edinburgh', size = 2) +
+        coord_sf(ylim = c(min_max_coords[1], min_max_coords[3]),
+                 xlim = c(min_max_coords[2], min_max_coords[4]),
+                 expand = FALSE)
+    })
+    
+    
+    output$street_plot = renderPlot({
+      
+      p <- subset_bin_data() %>%
+        ggplot(aes(x = street_name, y = cumul_total_weight_kg, fill = street_name)) +
+        geom_col() +
+        scale_fill_manual(values = c("#e41a1c", "#377eb8")) +
+        theme_minimal() 
+      
+      if (input$scale_chosen == "Kilograms") {
+        p + 
+          scale_y_continuous(labels = scales::comma) +
+          labs(x = "Street name", y = "Cumulative total rubbish weight (kg)", fill = "Street name")
+        
+      } else {
+        p +
+          scale_y_continuous(breaks = c(3, 120, 980, 4300, 12000, 19500, 30000) , labels = c('Brick', 'Baby elephant', 'Vauxhall Corsa', 'Adult Elephant', 'Bus', 'Fire engine', 'Humpback whale')) +
+          labs(x = "Street name", y = "Cumulative total rubbish weight\n(equivalent weight objects)", fill = "Street name")
+      }
+    })
+    
+    
+    output$line_plot = renderPlot({
+      
+      streets_chosen <- c(input$street1_chosen, input$street2_chosen)
+      
+      p <- combined_bin_osm %>%
+        filter(cumul_date <= input$date_chosen, street_name %in% streets_chosen) %>%
+        ggplot(aes(x = date, y = cumul_total_weight_kg, color = street_name)) +
+        geom_line() +
+        scale_colour_manual(values = c("#e41a1c", "#377eb8"))  +
+        xlim(min(combined_bin_osm$date), max(combined_bin_osm$date)) +
+        scale_x_date(date_labels = "%d%b%y") +
+        theme_minimal() 
+      
+      if (input$scale_chosen == "Kilograms") {
+        p +
+          scale_y_continuous(labels = scales::comma) +
+          labs(x = "Street name", y = "Cumulative total rubbish weight (kg)", color = "Street name")
+      } else {
+        p +
+          scale_y_continuous(breaks = c(3, 120, 980, 4300, 12000, 19500, 30000) , labels = c('Brick', 'Baby elephant', 'Vauxhall Corsa', 'Adult Elephant', 'Bus', 'Fire engine', 'Humpback whale')) +
+          labs(x = "Street name", y = "Cumulative total rubbish weight\n(equivalent weight objects)", color = "Street name")
+      }
+      
+    })
+  },
+  
+  options = list(height = 500)
+)
+
+

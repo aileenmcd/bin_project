@@ -1,5 +1,5 @@
 ---
-title: "Edinburgh bin sensor Shiny app"
+title: "Edinburgh bin sensor project - Shiny app"
 output:
   html_document:
     df_print: paged
@@ -173,7 +173,7 @@ ggplot() +
           
       } else {
         p +
-        scale_y_continuous(breaks = c(120, 983) , labels = c('baby elephant', 'vauxhall corsa')) +
+        scale_y_continuous(breaks = c(3, 120, 980, 4300, 12000, 19500, 30000) , labels = c('Brick', 'Baby elephant', 'Vauxhall Corsa', 'Adult Elephant', 'Bus', 'Fire engine', 'Humpback whale')) +
         labs(x = "Street name", y = "Cumulative total rubbish weight\n(equivalent weight objects)", fill = "Street name")
       }
     })
@@ -198,7 +198,7 @@ ggplot() +
         labs(x = "Street name", y = "Cumulative total rubbish weight (kg)", color = "Street name")
        } else {
         p +
-       scale_y_continuous(breaks = c(120, 983) , labels = c('baby elephant', 'vauxhall corsa')) +
+        scale_y_continuous(breaks = c(3, 120, 980, 4300, 12000, 19500, 30000) , labels = c('Brick', 'Baby elephant', 'Vauxhall Corsa', 'Adult Elephant', 'Bus', 'Fire engine', 'Humpback whale')) +
         labs(x = "Street name", y = "Cumulative total rubbish weight\n(equivalent weight objects)", color = "Street name")
        }
     

@@ -1,0 +1,13 @@
+name: bin_project
+title: bin_project
+username:
+account: aileen-mcd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4281711
+bundleId: 4724980
+url: https://aileen-mcd.shinyapps.io/bin_project/
+when: 1623882225.43477
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: readme.md|README.Rmd|cleaning_scripts/cleaning_bin_data.R|cleaning_scripts/cleaning_osm_data.R|cleaning_scripts/joining_bin_to_osmdata.R|images/bin_pic.jpeg|images/peter-cordes-H-Qx6KAyuJQ-unsplash.jpg|raw_data/.DS_Store|raw_data/raw_bin_data.xlsx|output

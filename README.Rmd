@@ -7,15 +7,9 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Overview
+## Project overview
 
-Photo by <a href="https://unsplash.com/@peter_cordes?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Peter Cordes</a> on <a href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
-  
-  
-```{r, echo=FALSE, fig.cap="", out.width = '60%'}
-knitr::include_graphics("images/bin_pic.jpeg")
-knitr::include_graphics("images/peter-cordes-H-Qx6KAyuJQ-unsplash.jpg")
-```
+<img src="images/edinburgh.jpg" width="65%"/> 
 
 This is a project using data from a bin sensor project in Edinburgh when public rubbish bins had sensors fitted so that bin lorry crews know when they are full. A total of 323 litter bins in the city centre, Leith Walk, Leith Links and Portobello Promenade were fitted with the sensors. More can be found about the project [here](https://www.heraldscotland.com/news/14745124.edinburgh-litter-bins-fitted-sensors-bin-lorry-crews-know-need-emptied/). The data covers the period 3rd June 2016 to 9th August 2016. 
 
@@ -46,18 +40,25 @@ Notes on some of the decisions made during the cleaning process:
 
 There are 2 pieces of work for analysing & visualising the data (which are still works in process) saved in the [output folder](./output):
 
-* Markdown report [here](output/analysis_report/total_rubbish_spatial_analysis.html) with some visuals on top and bottom streets in terms of cumulative rubbish weight, spatial visualisation of streets in terms of rubbish weight and looking at the rate of change of rubbish accumulating on particular streets. 
-* Shiny app (code [here](output/shiny_app/shiny_apps.html)) where the user can select 2 streets and compare the total weight, how the weight accumulated over time and where the streets are located spatially. The user can select for the graphs to be in kilograms or equivalent weight object (as an alternative way of conceptualising the weight of the rubbish). The app is also hosted [here]() if don't want to run the code. 
+* Markdown report [here](output/analysis_report) with some visuals on top and bottom streets in terms of cumulative rubbish weight, spatial visualisation of streets in terms of rubbish weight and looking at the rate of change of rubbish accumulating on particular streets. 
+* Shiny app (code [here](output/shiny_app/)) where the user can select 2 streets and compare the total weight, how the weight accumulated over time and where the streets are located spatially. The user can select for the graphs to be in kilograms or equivalent weight object (as an alternative way of conceptualising the weight of the rubbish). The app is also hosted [here](https://aileen-mcd.shinyapps.io/bin_project/) if don't want to run the code. 
 
 ### Some output from the report 
 
 1. Looked at top and bottom streets for total rubbish weight 
-![](output/analysis_report/plot_images/top_streets_kg.png)
-![](output/analysis_report/plot_images/bottom_streets_kg.png)
+
+<p align="center">
+<img src="output/analysis_report/plot_images/top_streets_kg.png" width="75%" height="75%" />
+</p>
+
+<p align="center">
+<img src="output/analysis_report/plot_images/bottom_streets_kg.png" width="75%" height="75%" />
+</p>
+
 
 2. Put the scales of this into objects to help contextualise the weights.
 
-<center>
+<p align="center">
 
 | Object     | Average weight (kg) |
 | ----------- | ----------- |
@@ -67,9 +68,11 @@ There are 2 pieces of work for analysing & visualising the data (which are still
 | Fire engine | 19,500 |
 | Humpback whale | 30,000 |
 
-</center>
+</p>
 
-![](output/analysis_report/plot_images/top_street_objects.png)
+<p align="center">
+<img src="output/analysis_report/plot_images/top_street_objects.png" width="75%" height="75%" />
+</p>
 
 3. 'Base' map highlighting which streets have sensor bins.
 ![](output/analysis_report/plot_images/streets_highlighted.png)
@@ -83,8 +86,14 @@ There are 2 pieces of work for analysing & visualising the data (which are still
 
 ![](output/analysis_report/plot_images/streets_by_weight_red_yellow_nops.png)
 6. Looked at how the weight of rubbish accumulates over time:
-![](output/analysis_report/plot_images/weight_over_time.png)
 
-7. From digging into this and looked at the rate of change (by doing a log transformation) picked out 2 streets which had particularly different rates of change compared to the others. For Hermitage Place there was only a small bit of rubbish on the 2nd day of having the sensor (it is a little out of city centre) or the sensor perhaps didn't work after this day. Similarly for Calton Hill perhaps there was an issue with the sensor as after the start of July the rate of increase increases sharply but there is nothing read before this. 
+<p align="center">
+<img src="output/analysis_report/plot_images/weight_over_time.png" width="75%" height="75%" />
+</p>
 
-![](output/analysis_report/plot_images/weight_over_time_subset.png)
+
+7. From digging into this looked at the rate of change (by doing a log transformation) picked out 2 streets which had particularly different rates of change compared to the others. For Hermitage Place there was only a small bit of rubbish on the 2nd day of having the sensor (it is a little out of city centre) or the sensor perhaps didn't work after this day. Similarly for Calton Hill perhaps there was an issue with the sensor as after the start of July the rate of increase increases sharply but there is nothing read before this. 
+
+<p align="center">
+<img src="output/analysis_report/plot_images/weight_over_time_subset.png" width="75%" height="75%" />
+</p>
