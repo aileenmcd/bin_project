@@ -40,8 +40,9 @@ Street Maps Using R).
 ## Cleaning
 
 The scripts to clean and tidy the bin data and OSM data and join these
-together as in the ‘cleaning\_scripts’ folder. The cleaned data is then
-saved in the folder ‘cleaned\_data’.
+together as in the folder [cleaning\_scripts](./cleaning_scripts). The
+cleaned data is then saved in the folder
+[cleaned\_data](./cleaned_data).
 
 Notes on some of the decisions made during the cleaning process:
 
@@ -57,18 +58,21 @@ Notes on some of the decisions made during the cleaning process:
 ## Analysis & visualisation
 
 There are 2 pieces of work for analysing & visualising the data (which
-are still works in process):
+are still works in process) saved in the [output folder](./output):
 
-  - Markdown report with some visuals on top and bottom streets in terms
-    of cumulative rubbish weight, spatial visualisation of streets in
-    terms of rubbish weight and looking at the rate of change of rubbish
-    accumulating on particular streets.
-  - Shiny app where the user can select 2 streets and compare the total
-    weight, how the weight accumulated over time and where the streets
-    are located spatially. The user can select for the graphs to be in
-    kilograms or equivalent weight object (as an alternative way of
-    conceptualising the weight of the rubbish). The app is also hosted
-    [here]() if don’t want to run the code.
+  - Markdown report
+    [here](output/analysis_report/total_rubbish_spatial_analysis.html)
+    with some visuals on top and bottom streets in terms of cumulative
+    rubbish weight, spatial visualisation of streets in terms of rubbish
+    weight and looking at the rate of change of rubbish accumulating on
+    particular streets.
+  - Shiny app (code [here](output/shiny_app/shiny_apps.html)) where the
+    user can select 2 streets and compare the total weight, how the
+    weight accumulated over time and where the streets are located
+    spatially. The user can select for the graphs to be in kilograms or
+    equivalent weight object (as an alternative way of conceptualising
+    the weight of the rubbish). The app is also hosted [here]() if don’t
+    want to run the code.
 
 ### Some output from the report
 
