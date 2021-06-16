@@ -37,7 +37,13 @@ this [blog](https://taraskaduk.com/posts/2021-01-18-print-street-maps/)
 (Reference: Kaduk (2021, Jan. 18). Taras Kaduk: Print Personalized
 Street Maps Using R).
 
-Notes on some of the locations:
+## Cleaning
+
+The scripts to clean and tidy the bin data and OSM data and join these
+together as in the ‘cleaning\_scripts’ folder. The cleaned data is then
+saved in the folder ‘cleaned\_data’.
+
+Notes on some of the decisions made during the cleaning process:
 
   - Decided to concentrate on Edinburgh City Centre so did not include
     locations in Portobello.
@@ -45,5 +51,85 @@ Notes on some of the locations:
     Princes Street Gardens West are all parks so decide to remove from
     analysis as found visualising volume via thickness of line of street
     did not work well for parks (since these are filled polygons).
-  - Restalrig railway path is a cycleway on OSM so choose to also
-    remove.
+  - Restalrig railway path is a cycleway on OpenStreetMap so choose to
+    also remove.
+
+## Analysis & visualisation
+
+There are 2 pieces of work for analysing & visualising the data (which
+are still works in process):
+
+  - Markdown report with some visuals on top and bottom streets in terms
+    of cumulative rubbish weight, spatial visualisation of streets in
+    terms of rubbish weight and looking at the rate of change of rubbish
+    accumulating on particular streets.
+  - Shiny app where the user can select 2 streets and compare the total
+    weight, how the weight accumulated over time and where the streets
+    are located spatially. The user can select for the graphs to be in
+    kilograms or equivalent weight object (as an alternative way of
+    conceptualising the weight of the rubbish). The app is also hosted
+    [here]() if don’t want to run the code.
+
+### Some output from the report
+
+1.  Looked at top and bottom streets for total rubbish weight
+    ![](output/analysis_report/plot_images/top_streets_kg.png)
+    ![](output/analysis_report/plot_images/bottom_streets_kg.png)
+
+2.  Put the scales of this into objects to help contextualise the
+    weights.
+
+<center>
+
+| Object         | Average weight (kg) |
+| -------------- | ------------------- |
+| Vauxhall Corsa | 980                 |
+| Adult elephant | 4,300               |
+| UK bus         | 12,000              |
+| Fire engine    | 19,500              |
+| Humpback whale | 30,000              |
+
+</center>
+
+![](output/analysis_report/plot_images/top_street_objects.png)
+
+3.  ‘Base’ map highlighting which streets have sensor bins.
+    ![](output/analysis_report/plot_images/streets_highlighted.png)
+
+4.  Spatially visualising streets by the weight of the total rubbish
+    collected. A lot of sequential colour palettes begin at very light
+    colours which would make it hard to see some of the streets with
+    lower levels of rubbish, tested out a few colour schemes. From this
+    blog
+    (here)\[<https://blog.datawrapper.de/which-color-scale-to-use-in-data-vis/>\]
+    by Lisa Charlotte Rost she said on sequential colour schemes *‘Using
+    two or even more hues increases the color contrast between segments
+    of your gradient, making it easier for readers to distinguish
+    between them’*. In future want to give this more of an investigation
+    and look into some more palettes (or potentially using a different
+    coloured background).
+
+![](output/analysis_report/plot_images/streets_by_weight_red_yellow.png)
+![](output/analysis_report/plot_images/streets_by_weight_sunset.png)
+
+5.  Show that Princes Street is a big outlier. Makes sense as it is the
+    main shopping street in Edinburgh and lots of footfall. In future
+    look to see if any open footfall data to add to analysis. Look at
+    the same plot as above but omitting Princes Street to more clearly
+    show differences between the other streets (could potentially have
+    also done a transformation).
+
+![](output/analysis_report/plot_images/streets_by_weight_red_yellow_nops.png)
+6. Looked at how the weight of rubbish accumulates over time:
+![](output/analysis_report/plot_images/weight_over_time.png)
+
+7.  From digging into this and looked at the rate of change (by doing a
+    log transformation) picked out 2 streets which had particularly
+    different rates of change compared to the others. For Hermitage
+    Place there was only a small bit of rubbish on the 2nd day of having
+    the sensor (it is a little out of city centre) or the sensor perhaps
+    didn’t work after this day. Similarly for Calton Hill perhaps there
+    was an issue with the sensor as after the start of July the rate of
+    increase increases sharply but there is nothing read before this.
+
+![](output/analysis_report/plot_images/weight_over_time_subset.png)
